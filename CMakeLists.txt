@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 find_package(Threads REQUIRED)
 
@@ -31,3 +31,19 @@ add_executable(benchmark
   src/itch_parser.cpp
 )
 target_include_directories(benchmark PRIVATE include)
+
+# Tests
+enable_testing()
+
+add_executable(test_order_book tests/test_order_book.cpp src/order_book.cpp)
+target_include_directories(test_order_book PRIVATE include)
+
+add_executable(test_itch_parser tests/test_itch_parser.cpp src/itch_parser.cpp)
+target_include_directories(test_itch_parser PRIVATE include)
+
+add_executable(test_detector tests/test_detector.cpp src/detector.cpp src/order_book.cpp)
+target_include_directories(test_detector PRIVATE include)
+
+add_test(NAME order_book  COMMAND test_order_book)
+add_test(NAME itch_parser COMMAND test_itch_parser)
+add_test(NAME detector    COMMAND test_detector)

@@ -16,13 +16,10 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build --config Release -j$(nproc)
+        run: cmake --build build -j$(nproc)
 
       - name: Run tests
-        run: |
-          ./build/test_order_book
-          ./build/test_itch_parser
-          ./build/test_detector
+        run: ctest --test-dir build --output-on-failure
 
       - name: Run benchmark
         run: ./build/benchmark
