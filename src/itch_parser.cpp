@@ -13,18 +13,18 @@ size_t ItchParser::parse(const uint8_t* buf, size_t len, ItchMessage& out) const
     char type = static_cast<char>(p[0]);
     std::memset(&out, 0, sizeof(out));
 
+    // p[0] = type, then stock_locate(2) tracking(2) timestamp(6) order_id(8)
+    // side(1) qty(4) symbol(8) price(4)
     switch (type) {
-        case 'A': {  // Add Order (36 bytes)
+        case 'A': {  // Add Order (36 bytes body)
             if (msg_len < 36) return 0;
-            out.type      = MsgType::Add;
-            // skip stock locate (2) + tracking number (2)
+            out.type         = MsgType::Add;
             out.timestamp_ns = read_u48(p + 5);
             out.order_id     = read_u64(p + 11);
             out.side         = (p[19] == 'B') ? Side::Buy : Side::Sell;
             out.qty          = read_u32(p + 20);
             std::memcpy(out.symbol, p + 24, 8);
             out.symbol[8] = '\0';
-            // trim trailing spaces from symbol
             for (int i = 7; i >= 0 && out.symbol[i] == ' '; --i) out.symbol[i] = '\0';
             out.price = itch_price(read_u32(p + 32));
             return HEADER_SIZE + 36;

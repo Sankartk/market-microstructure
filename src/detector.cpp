@@ -5,8 +5,6 @@
 
 namespace mm {
 
-PatternDetector::PatternDetector(Config cfg) : cfg_(cfg) {}
-
 void PatternDetector::on_add(OrderId id, Price price, Qty qty, Side side,
                               TsNs ts, const std::string& symbol) {
     auto& s = state_[symbol];

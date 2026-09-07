@@ -42,7 +42,8 @@ public:
         uint32_t quote_stuffing_threshold = 10'000;
     };
 
-    explicit PatternDetector(Config cfg = Config{});
+    explicit PatternDetector(Config cfg) : cfg_(cfg) {}
+    PatternDetector() : PatternDetector(Config{}) {}
 
     void on_add(OrderId id, Price price, Qty qty, Side side,
                 TsNs ts, const std::string& symbol);

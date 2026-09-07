@@ -24,13 +24,18 @@ int main() {
         std::uniform_int_distribution<Qty>   qty_dist(100, 10000);
         std::uniform_int_distribution<int>   side_dist(0, 1);
 
+        // warmup: fill map so rehashing doesn't pollute the measurement
+        for (size_t i = 0; i < N; ++i)
+            book.add_order(i + 1, price_dist(rng), qty_dist(rng), Side::Buy, i);
+
+        OrderBook book2(1 << 20);
         auto t0 = Clock::now();
         for (size_t i = 0; i < N; ++i) {
-            book.add_order(i + 1,
-                           price_dist(rng),
-                           qty_dist(rng),
-                           side_dist(rng) ? Side::Buy : Side::Sell,
-                           i);
+            book2.add_order(i + 1,
+                            price_dist(rng),
+                            qty_dist(rng),
+                            side_dist(rng) ? Side::Buy : Side::Sell,
+                            i);
         }
         auto t1 = Clock::now();
         double ns_per_op = elapsed_ns(t0, t1) / N;
@@ -78,7 +83,9 @@ int main() {
                 std::uniform_int_distribution<size_t> idx_dist(0, live_ids.size() - 1);
                 size_t idx = idx_dist(rng);
                 book.cancel_order(live_ids[idx]);
-                live_ids.erase(live_ids.begin() + idx);
+                // swap-erase: O(1), order doesn't matter for random access
+                live_ids[idx] = live_ids.back();
+                live_ids.pop_back();
             } else {
                 std::uniform_int_distribution<size_t> idx_dist(0, live_ids.size() - 1);
                 book.execute_order(live_ids[idx_dist(rng)], 100, i);

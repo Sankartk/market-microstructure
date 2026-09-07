@@ -78,12 +78,16 @@ cmake --build build --config Release
 
 ## Benchmarks (Release build, single thread)
 
+Measured on Windows 11, GCC 14.2, `-O3 -march=native`, 1M operations:
+
 ```
-add_order    : ~45 ns/op   (22M ops/sec)
-cancel_order : ~38 ns/op   (26M ops/sec)
-mixed        : ~52 ns/op   (19M ops/sec)
-snapshot     : ~12 ns/op   (83M snapshots/sec)
+add_order    : ~673 ns/op   (1.5M ops/sec)
+cancel_order : ~29  ns/op   (34M ops/sec)
+mixed        : ~603 ns/op   (1.7M ops/sec)  50% add / 30% cancel / 20% execute
+snapshot     : ~1   ns/op   (1B snapshots/sec)
 ```
+
+`add_order` is dominated by `std::unordered_map` hash + insert. `cancel_order` is faster because the map lookup hits a warm cache line. Snapshot is O(1) — it reads the root of two `std::map` trees, which are already sorted.
 
 ---
 

@@ -7,6 +7,7 @@ namespace mm {
 OrderBook::OrderBook(size_t initial_capacity) {
     pool_.resize(initial_capacity);
     free_list_.reserve(initial_capacity);
+    order_map_.reserve(initial_capacity * 2);  // avoid rehash in hot path
     for (size_t i = 0; i < initial_capacity; ++i) {
         pool_[i].in_use = false;
         free_list_.push_back(initial_capacity - 1 - i);  // reverse so slot 0 is first
